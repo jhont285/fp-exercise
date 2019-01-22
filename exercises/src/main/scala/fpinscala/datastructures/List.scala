@@ -8,6 +8,7 @@ which may be `Nil` or another `Cons`.
 case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
 object List { // `List` companion object. Contains functions for creating and working with lists.
+
   def sum(ints: List[Int]): Int = ints match { // A function that uses pattern matching to add up a list of integers
     case Nil => 0 // The sum of the empty list is 0.
     case Cons(x,xs) => x + sum(xs) // The sum of a list starting with `x` is `x` plus the sum of the rest of the list.
@@ -50,19 +51,130 @@ object List { // `List` companion object. Contains functions for creating and wo
     foldRight(ns, 1.0)(_ * _) // `_ * _` is more concise notation for `(x,y) => x * y`; see sidebar
 
 
-  def tail[A](l: List[A]): List[A] = ???
+  def tail[A](l: List[A]): List[A] =
+    l match {
+      case Nil => l
+      case Cons(x, xs) => xs
+    }
 
-  def setHead[A](l: List[A], h: A): List[A] = ???
+  def setHead[A](l: List[A], h: A): List[A] =
+    l match {
+      case Nil => l
+      case Cons(x, xs) => Cons(h, xs)
+    }
 
-  def drop[A](l: List[A], n: Int): List[A] = ???
+  def drop[A](l: List[A], n: Int): List[A] =
+    l match {
+      case Nil => l
+      case Cons(x, xs) => if (n == 0) l else drop(xs, n - 1)
+    }
 
-  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = ???
 
-  def init[A](l: List[A]): List[A] = ???
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] =
+    l match {
+      case Nil => l
+      case Cons(x, xs) => if (f(x)) dropWhile(xs, f) else l
+    }
 
-  def length[A](l: List[A]): Int = ???
+  def init[A](l: List[A]): List[A] =
+    l match {
+      case Nil => l
+      case Cons(x, xs) => if (xs == Nil) xs else Cons(x, init(xs))
+    }
 
-  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = ???
+  //  Compute the length of a list using foldRight.
+  def length[A](l: List[A]): Int =
+    foldRight(l, 0)((x,y) => 1 + y)
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = ???
+  //  Our implementation of foldRight is not tail-recursive and will result in a StackOverflowError
+  //  for large lists (we say it’s not stack-safe). Convince yourself that this is the
+  //  case, and then write another general list-recursion function, foldLeft, that is
+  //  tail-recursive, using the techniques we discussed in the previous chapter. Here is its
+  //  signature:
+  //  how to copy
+
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = {
+    @annotation.tailrec
+    def go[A, B](as: List[A], axum: B, f: (B, A) => B): B =
+      as match {
+        case Nil => axum
+        case Cons(x, xs) => go(xs, f(axum, x), f)
+      }
+
+    go(l, z, f)
+  }
+
+  def map[A,B](l: List[A])(f: A => B): List[B] =
+    l match {
+      case Nil => Nil
+      case Cons(x,xs) => Cons(f(x), map(xs)(f))
+    }
+
+  def main(args: Array[String]): Unit = {
+
+    println(tail(List(1, 2, 3)))
+    println(tail(List(3, 2, 3)))
+    println(tail(List(3, 2, 1)))
+    println(tail(List(3)))
+    println(tail(List()))
+    println()
+    println()
+    println(setHead(List(1, 2, 3), 5))
+    println(setHead(List(3, 2, 3), 2))
+    println(setHead(List(3, 2, 1), 1))
+    println(setHead(List(3), 5))
+    println(setHead(List(), 5))
+    println()
+    println()
+
+
+    println(setHead(List(1, 2, 3), 1))
+    println(setHead(List(3, 2, 3), 2))
+    println(setHead(List(3, 2, 1, 5), 4))
+    println(setHead(List(3), 1))
+    println(setHead(List(), 0))
+    println()
+    println()
+    println(length(List(1, 2, 3)))
+    println(length(List(1)))
+    println(length(List(1, 2)))
+    println(length(List()))
+    println()
+    println()
+
+    val primes = List(2, 3, 4, 5)
+    println(drop(primes, 2))
+    println(drop(primes, 1))
+    println(drop(primes, 3))
+    println(drop(primes, 4))
+    println()
+    println()
+
+    println()
+    println()
+
+    println(dropWhile(List(1, 2, 3), (x: Int) => x < 2))
+    println(dropWhile(List(1, 2, 3), (x: Int) => x > 2))
+    println(dropWhile(List(1, 2, 3), (x: Int) => x > 0))
+    println(dropWhile(Nil, (x: Int) => x > 0))
+
+    println()
+    println()
+
+    println(init(List(1, 2, 3, 4)))
+    println(init(List(1, 2)))
+    println(init(List(1)))
+    println(init(List()))
+
+    println(foldLeft(List(1, 2, 3, 10), 0)((x: Int, y: Int) => x + y))
+    println(foldLeft(List(1, 2, 3, 10), 1)((x: Int, y: Int) => x * y))
+
+
+    println(map(List(1, 2, 3, 10))((x: Int) => 2 * x))
+    println(map(List(1, 2, 3, 10))((x: Int) => 2 + x))
+
+
+
+
+  }
 }
