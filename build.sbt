@@ -20,3 +20,5 @@ lazy val answers = (project in file("answers"))
   .settings(
     name := "answers"
   )
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
