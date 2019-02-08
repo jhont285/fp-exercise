@@ -55,6 +55,9 @@ object Tree {
   ///////////////////////////////////////////////////////////////////////////
   // doubt: is map possible implement with the other functions if size, maximun and depth return a B and map -> Tree[B]
   // doubt:
+  // FoldRight and FoldLeft are possible via recursive
+  // * I believe that isn't possible create foldLeft because I haven't current element I have is the branch
+  // I can't accumulate
   ///////////////////////////////////////////////////////////////////////////
 
   def fold[A, B](as: Tree[A], z: A => B)(f: (B, B) => B): B = {
@@ -63,8 +66,6 @@ object Tree {
       case Branch(a, b) => f(fold(a, z)(f), fold(b, z)(f))
     }
   }
-
-
 
   def main(args: Array[String]): Unit = {
 
